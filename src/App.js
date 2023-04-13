@@ -1,25 +1,118 @@
-import logo from './logo.svg';
+import React,{Component} from 'react';
 import './App.css';
+import "bootstrap/dist/css/bootstrap.min.css";
+import Weather from './components/weather';
+import "weather-icons/css/weather-icons.css";
+import Form from './components/form';
+const API_key = "665d281dd6d49890450bc86fdbdc4e71";
+export default class App extends Component{
+  constructor(props){
+  super(props)
+  this.state={
+    city:undefined,
+    country:undefined,
+    main:undefined,
+    temp_max:undefined,
+    temp_min:undefined,
+    icon:undefined,
+    error:false,
+    description:undefined,
+    celcius:undefined,
+  };
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  this.weatherIcon={
+    Thunderstorm:"wi-thunderstorm",
+    Drizzle:"wi-sleet",
+    Rain:"wi-storm-showers",
+    Snow:"wi-snow",
+    Atmosphere:"wi-fog",
+    Clear:"wi-day-sunny",
+    Clouds:"wi-day-clouds",
+
+  }
+  
+  this.getWeather = this.getWeather.bind(this);
+    this.getWeather();    
+  }
+  calCelcius(temp){
+    let cell = Math.floor(temp-273.15)
+    return cell;
+  }
+  get_weatherIcon(icon,rangeId){
+    switch(rangeId){
+      case rangeId >=200 && rangeId <=232:
+        this.setState({icon:this.weatherIcon.Thunderstorm})
+        break
+        case rangeId >=300 && rangeId <=331:
+          this.setState({icon:this.weatherIcon.Drizzle})
+          break
+          case rangeId >=500 && rangeId <=531:
+            this.setState({icon:this.weatherIcon.Rain})
+            break
+            case rangeId >=600 && rangeId <=622:
+            this.setState({icon:this.weatherIcon.Snow})
+            break
+            case rangeId >=701 && rangeId <=781:
+              this.setState({icon:this.weatherIcon.Atmosphere})
+              break
+              case rangeId === 800:
+              this.setState({icon:this.weatherIcon.Clear})
+              break
+              case rangeId >=801 && rangeId <=804:
+                this.setState({icon:this.weatherIcon.Clouds})
+                break
+                default:
+                this.setState({icon:this.weatherIcon.Clouds})
+
+    }
+  }
+  async getWeather(e){
+    
+    e.preventDefault();
+    const city = e.target.element.city.value;
+    const country = e.target.element.country.value;
+   
+    try {
+      const api_call = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${country},${city}&appid=${API_key}`);
+      const response = await api_call.json();
+      console.log(response,"response");
+
+      this.setState({
+        city: response.name,
+        country: response.sys.country,
+        main: response.weather[0].main,
+        celcius: this.calCelcius(response.main.temp),
+        temp_max: this.calCelcius(response.main.temp_max),
+        temp_min: this.calCelcius(response.main.temp_min),
+        description: response.weather[0].description,
+      });
+    } catch (error) {
+      console.error(error);
+      this.setState({ error: true });
+    }
+
+    this.get_weatherIcon(this.weatherIcon,this.response.weather[0].id)
+  }
+
+  render() {
+    return (
+      <div className="App">
+
+        <Form loadWeather={this.getWeather} error={this.state.error}></Form>
+        {this.state.error ? (
+          <div>Error loading weather data</div>
+        ) : (
+          <Weather 
+            city={this.state.city}
+            country={this.state.country} 
+            temp={this.state.celcius}
+            mintemp={this.state.temp_min}
+            maxtemp={this.state.temp_max}
+            description={this.state.description}
+            weatherIcon={this.state.icon}
+          />
+        )}
+      </div>
+    )
+  }
 }
-
-export default App;
