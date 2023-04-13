@@ -38,39 +38,40 @@ export default class App extends Component{
     let cell = Math.floor(temp-273.15)
     return cell;
   }
-  get_weatherIcon(icon,rangeId){
+  get_weatherIcon(icons,rangeId){
     switch(rangeId){
       case rangeId >=200 && rangeId <=232:
-        this.setState({icon:this.weatherIcon.Thunderstorm})
+        this.setState({icon:icons.Thunderstorm})
         break
         case rangeId >=300 && rangeId <=331:
-          this.setState({icon:this.weatherIcon.Drizzle})
+          this.setState({icon:icons.Drizzle})
           break
           case rangeId >=500 && rangeId <=531:
-            this.setState({icon:this.weatherIcon.Rain})
+            this.setState({icon:icons.Rain})
             break
             case rangeId >=600 && rangeId <=622:
-            this.setState({icon:this.weatherIcon.Snow})
+            this.setState({icon:icons.Snow})
             break
             case rangeId >=701 && rangeId <=781:
-              this.setState({icon:this.weatherIcon.Atmosphere})
+              this.setState({icon:icons.Atmosphere})
               break
               case rangeId === 800:
-              this.setState({icon:this.weatherIcon.Clear})
+              this.setState({icon:icons.Clear})
               break
               case rangeId >=801 && rangeId <=804:
-                this.setState({icon:this.weatherIcon.Clouds})
+                this.setState({icon:icons.Clouds})
                 break
                 default:
-                this.setState({icon:this.weatherIcon.Clouds})
-
+                this.setState({icon:icons.Clouds})
     }
   }
   async getWeather(e){
     
     e.preventDefault();
-    const city = e.target.element.city.value;
-    const country = e.target.element.country.value;
+    const city = e.target.elements.city.value;
+    const country = e.target.elements.country.value;
+
+    console.log(city,country,"countryyyyy");
    
     try {
       const api_call = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${country},${city}&appid=${API_key}`);
@@ -78,13 +79,14 @@ export default class App extends Component{
       console.log(response,"response");
 
       this.setState({
-        city: response.name,
+        city:`${response.name},${response.sys.country}`,
         country: response.sys.country,
         main: response.weather[0].main,
         celcius: this.calCelcius(response.main.temp),
         temp_max: this.calCelcius(response.main.temp_max),
         temp_min: this.calCelcius(response.main.temp_min),
         description: response.weather[0].description,
+        error: false
       });
     } catch (error) {
       console.error(error);
@@ -95,15 +97,16 @@ export default class App extends Component{
   }
 
   render() {
+    console.log(this.state.city,"city");
     return (
       <div className="App">
 
-        <Form loadWeather={this.getWeather} error={this.state.error}></Form>
+        <Form loadweather={this.getWeather} error={this.state.error}></Form>
         {this.state.error ? (
           <div>Error loading weather data</div>
         ) : (
           <Weather 
-            city={this.state.city}
+           cityname={this.state.city}
             country={this.state.country} 
             temp={this.state.celcius}
             mintemp={this.state.temp_min}

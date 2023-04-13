@@ -2,10 +2,12 @@ import React from 'react';
 import "./form.css";
 
 function Form(props) {
+  console.log(props,"propsssss");
   return (
-    <div className='container'>
+    <div className="container h-100">
+    
       <div>{props.error?error():null}</div>
-       <form onsubmit={props.loadWeather()}>
+      <form onSubmit={props.loadweather}>
         <div className='row'>
                 <div className='col-md-3 offset md-2'>
                     <input type='text' className='form-control' name='city' 
